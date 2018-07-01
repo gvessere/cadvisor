@@ -292,16 +292,16 @@ func getMemoryData(path, name string) (cgroups.MemoryData, error) {
 		return cgroups.MemoryData{}, fmt.Errorf("failed to parse %s - %v", maxUsage, err)
 	}
 	memoryData.MaxUsage = value
+	err = setCgroupParamUint(path, maxUsage, 0)
+	if err != nil {
+		return cgroups.MemoryData{}, fmt.Errorf("failed to reset %s - %v", maxUsage, err)
+	}
 	value, err = getCgroupParamUint(path, failcnt)
 	if err != nil {
 		if moduleName != "memory" && os.IsNotExist(err) {
 			return cgroups.MemoryData{}, nil
 		}
 		return cgroups.MemoryData{}, fmt.Errorf("failed to parse %s - %v", failcnt, err)
-	}
-	err = setCgroupParamUint(path, maxUsage, 0)
-	if err != nil {
-		return cgroups.MemoryData{}, fmt.Errorf("failed to reset max_usage_in_bytes")
 	}
 	memoryData.Failcnt = value
 	value, err = getCgroupParamUint(path, limit)
